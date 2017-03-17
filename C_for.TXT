@@ -1,0 +1,11 @@
+program example;
+var
+     a1,233b,c:integer;
+x:char;
+begin
+
+for i := a%b*2 to c+d+10 do
+if h>g then p:=p+1;
+
+
+end.
