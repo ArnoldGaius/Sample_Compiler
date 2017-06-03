@@ -1,6 +1,7 @@
 package UI;
 
 import java.awt.EventQueue;
+
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -9,21 +10,36 @@ import javax.swing.JPanel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JTable;
+
 import java.awt.FlowLayout;
+
 import javax.swing.JTextArea;
+
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Color;
+import java.awt.Image;
+import java.awt.Toolkit;
+
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+
+import YYtest.Word;
+import YYtest.semTest;
 import Analysis.AnalysisCodeToWord;
+import Analysis.grammaticalAnalysis;
+import Analysis.tokenNode;
+
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,6 +55,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Properties;
 import java.awt.Font;
 
@@ -47,8 +68,19 @@ public class MainUI {
 	private File file = null;
 	private static Profile profile = new Profile();
 	private static String  latestPath = (profile.read()?profile.latestPath:"C:/");
+	public String sigMap="";
+	private ArrayList<tokenNode> tokenMap = new ArrayList<tokenNode>(); //词法分析获得的token表字符/数字/关键字/常量...
+	public HashMap<String, String> var = new HashMap<String, String>();
+	public ArrayList<Word> semanticToken = new ArrayList<Word>();
+	JTextArea textArea_2 = new JTextArea();
+	JScrollPane scrollPane_2 = new JScrollPane(textArea_2);
 	
-
+	
+	JTable sigTable = new JTable(new DefaultTableModel(null, new Object[]{"Name","Length","Token","Type"}) {
+		  public boolean isCellEditable(int row, int column) {
+	  		    return false;
+	  		  }
+	  		});
 	/**
 	 * Launch the application.
 	 */
@@ -69,7 +101,8 @@ public class MainUI {
 			}
 		});
 	}
-
+ 
+	
 	protected void addWindowListener(WindowAdapter windowAdapter) {
 		// TODO Auto-generated method stub
 		  if(!new File(latestPath).exists()){
@@ -89,9 +122,12 @@ public class MainUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		Image icon = Toolkit.getDefaultToolkit().getImage("steam.jpg");
+		frame.setIconImage(icon);
 		frame.setBounds(100, 100, 834, 630);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+		frame.setLocationRelativeTo(null);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(null);
@@ -144,6 +180,10 @@ public class MainUI {
 		final JMenuItem wordAnalyzer_MI = new JMenuItem("\u8BCD\u6CD5\u5206\u6790\u5668");
 		WordAnaMenu.add(wordAnalyzer_MI);
 		
+		final JMenuItem sigMapMI = new JMenuItem("符号表");
+		sigMapMI.setEnabled(false);
+		WordAnaMenu.add(sigMapMI);
+		
 		JMenuItem reg2NFA2DFA2MFA = new JMenuItem("正则->NFA->DFA->MFA");
 		WordAnaMenu.add(reg2NFA2DFA2MFA);
 		
@@ -152,7 +192,8 @@ public class MainUI {
 		GraMI.setHorizontalAlignment(SwingConstants.LEFT);
 		GraMI.setFont(UIManager.getFont("ToolTip.font"));
 		
-		JMenuItem GraAnalyzer_MI = new JMenuItem("\u8BED\u6CD5\u5206\u6790\u5668");
+		final JMenuItem GraAnalyzer_MI = new JMenuItem("\u8BED\u6CD5\u5206\u6790\u5668");
+		GraAnalyzer_MI.setEnabled(false);
 		GraMI.add(GraAnalyzer_MI);
 		
 		JMenuItem LL1_MI = new JMenuItem("LL1\u9884\u6D4B\u5206\u6790");
@@ -168,6 +209,9 @@ public class MainUI {
 		MidCodeMenu.setFont(UIManager.getFont("ToolTip.font"));
 		menuBar.add(MidCodeMenu);
 		
+		final JMenuItem MidCodeMenuItem = new JMenuItem("中间代码生成");
+		MidCodeMenu.add(MidCodeMenuItem);
+		
 		JMenu targetCodeMaking = new JMenu("\u76EE\u6807\u4EE3\u7801\u751F\u6210");
 		targetCodeMaking.setFont(UIManager.getFont("ToolTip.font"));
 		menuBar.add(targetCodeMaking);
@@ -181,6 +225,15 @@ public class MainUI {
 		helpMenu.add(helpTextMI);
 		
 		JMenuItem aboutMI = new JMenuItem("\u5173\u4E8E...");
+		aboutMI.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				about abDialog = new about();
+				abDialog.frame.setVisible(true);
+			}
+		});
 		helpMenu.add(aboutMI);
 		
 		JPanel MainPanel = new JPanel();
@@ -198,6 +251,7 @@ public class MainUI {
 		codeArea.setFont(new Font("Microsoft YaHei UI Light", Font.PLAIN, 20));
 		
 		JScrollPane codeAreaScroll = new JScrollPane(codeArea);
+//		codeAreaScroll.setRowHeaderView(new LineNumberHeaderView()); //设置左边行号
 		CodePanel.add(codeAreaScroll);
 		
 		JPanel RightPanel = new JPanel();
@@ -224,14 +278,14 @@ public class MainUI {
 		RightPanel.add(ErrPanel);
 		ErrPanel.setLayout(new BorderLayout(0, 0));
 		
-		final JTextArea textArea_2 = new JTextArea();
+		textArea_2 = new JTextArea();
 		textArea_2.setFont(new Font("Monospaced", Font.PLAIN, 16));
 		textArea_2.setBackground(SystemColor.control);
 		textArea_2.setEditable(false);
 		
-		JScrollPane scrollPane_2 = new JScrollPane(textArea_2);
+		scrollPane_2 = new JScrollPane();
 		ErrPanel.add(scrollPane_2);
-		codeArea.getDocument().addDocumentListener(new DocumentListener() {
+		codeArea.getDocument().addDocumentListener(new DocumentListener() {//编码面板文本内容监听
 			
 			@Override
 			public void removeUpdate(DocumentEvent e) {
@@ -258,11 +312,12 @@ public class MainUI {
 		
 		final UndoManager undomg = new UndoManager(); //撤销 重做类
 		codeArea.getDocument().addUndoableEditListener(undomg);
-		codeArea.addKeyListener(new KeyListener(){
+		codeArea.addKeyListener(new KeyListener(){ //编码面板键盘按键监听
 
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
+				
 			}
 
 			@Override
@@ -290,11 +345,11 @@ public class MainUI {
 					
 				}
 				if (e.isControlDown()&&e.getKeyCode() == KeyEvent.VK_C){
-					codeArea.copy();
+//					codeArea.copy();
 					System.out.println("Copy");
 				}
 				if (e.isControlDown()&&e.getKeyCode() == KeyEvent.VK_V){
-					codeArea.paste();
+//					codeArea.paste();
 					System.out.println("Paste");
 				}
 			}
@@ -309,7 +364,7 @@ public class MainUI {
 
 
 		
-		OpenFile_MI.addActionListener(new ActionListener() {
+		OpenFile_MI.addActionListener(new ActionListener() {//打开文件监听
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser jfc = new JFileChooser();
@@ -345,7 +400,7 @@ public class MainUI {
 			}
 		});
 		
-		SaveFile_MI.addActionListener(new ActionListener() {
+		SaveFile_MI.addActionListener(new ActionListener() {//文件保存监听
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				   if(file == null) {
@@ -386,7 +441,7 @@ public class MainUI {
 		        
 			}
 		});
-		Exit_MI.addActionListener(new ActionListener() {
+		Exit_MI.addActionListener(new ActionListener() { //退出
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -394,37 +449,145 @@ public class MainUI {
 			}
 		});
 		
-		wordAnalyzer_MI.addActionListener(new ActionListener() {
+		wordAnalyzer_MI.addActionListener(new ActionListener() {//词法分析监听
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				textArea_1.setText("");
 				textArea_2.setText("");
+				GraAnalyzer_MI.setEnabled(false);
 				AnalysisCodeToWord cdAnalyzer = new AnalysisCodeToWord();
 				cdAnalyzer.readFromArea(codeArea);
 				cdAnalyzer.run();
 				TextPanel.setBorder (BorderFactory.createTitledBorder ("token表信息"));
-				textArea_1.append(cdAnalyzer.token);
+				textArea_1.append(cdAnalyzer.tokenString);//token表信息
+				tokenMap=cdAnalyzer.tokenMap;
+				sigMap=cdAnalyzer.sigMap;//字符表
 				textArea_1.append("------------------完成------------------");
 				ErrPanel.setBorder (BorderFactory.createTitledBorder ("词法分析-错误提示")); //设置标题
 				textArea_2.append(cdAnalyzer.errors);
 				textArea_2.append("词法分析结束:\t"+cdAnalyzer.errors_num+"-error(s)\n");
+				scrollPane_2.setViewportView(textArea_2);
+				if(cdAnalyzer.errors_num==0)//if没有错误，开启语法分析按钮
+					GraAnalyzer_MI.setEnabled(true);
+				sigMapMI.setEnabled(true);
 			}
 		});
-		reg2NFA2DFA2MFA.addActionListener(new ActionListener() {
+		
+		sigMapMI.addActionListener(new ActionListener() {//字符表按键
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				sigTable = new JTable(new DefaultTableModel(null, new Object[]{"Name","Length","Token","Type"}) {
+					  public boolean isCellEditable(int row, int column) {
+				  		    return false;
+				  		  }
+				  		});
+				String []sigRows = sigMap.split("\n");
+				System.out.println(sigMap);
+				DefaultTableModel sigDT = (DefaultTableModel) sigTable.getModel();
+				for(int i=0;i<sigRows.length;i++){
+					String [] sigLine = sigRows[i].split("\t");
+					sigDT.addRow(sigLine);
+				}
+				scrollPane_2.setViewportView(sigTable);	
+				ErrPanel.setBorder (BorderFactory.createTitledBorder ("符号表")); //设置标题
+			}
+			
+		});
+		reg2NFA2DFA2MFA.addActionListener(new ActionListener() {//正则->NFA->DFA->MFA
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				try {
 					reg2FA_UI window = new reg2FA_UI();
-					window.returnThisJFrame().setVisible(true);
+					window.frame.setVisible(true);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
-		
+		GraAnalyzer_MI.addActionListener(new ActionListener() {//语法分析监听
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				textArea_1.setText("");
+				textArea_2.setText("");
+				grammaticalAnalysis ga = new grammaticalAnalysis();
+				ga.tokenMap=tokenMap;
+				ga.run();
+				var=ga.var;
+				semanticToken.clear();
+				int index;
+				for(index=0;index<tokenMap.size();index++){
+					if("begin".equals(tokenMap.get(index).getWord()))
+						break;
+				}
+				for(index+=1;index<tokenMap.size();index++){
+					if("end".equals(tokenMap.get(index).getWord()))
+						break;
+					Word newWord = new Word(tokenMap.get(index).getToken(),tokenMap.get(index).getWord());
+//					System.out.println("("+String.valueOf(newWord.getType())+","+newWord.getValue()+")");
+					semanticToken.add(newWord);
+				}
+				TextPanel.setBorder (BorderFactory.createTitledBorder (""));//右上面板标题设置
+				ErrPanel.setBorder (BorderFactory.createTitledBorder ("语法分析-错误提示")); //右下面板标题设置
+				textArea_2.append(ga.errors);
+				textArea_2.append("语法分析完毕\terror(s)-("+ga.num_err+")");
+				MidCodeMenuItem.setEnabled(true);
+			}
+		});
+		MidCodeMenuItem.addActionListener(new ActionListener() {//中间代码分析监听
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				GraAnalyzer_MI.doClick();
+				textArea_1.setText("");
+				textArea_2.setText("");
+				semTest sem=new semTest(semanticToken);
+				sem.setVar(var);
+				sem.run();
+				if(sem.errorString.length()==0){
+					TextPanel.setBorder (BorderFactory.createTitledBorder ("中间代码——四元式"));//右上面板标题设置
+					textArea_1.append(sem.midInfo);
+				}
+				else{
+					TextPanel.setBorder (BorderFactory.createTitledBorder ("Error!"));//右上面板标题设置
+					textArea_1.append(sem.errorString);
+				}
+				
+				ErrPanel.setBorder (BorderFactory.createTitledBorder ("符号表显示区")); //右下面板标题设置
+				
+				String button = "行\t名称\ttoken值\t类型\n"; 
+				Iterator iter = var.entrySet().iterator();
+				Integer[] varToken = {34,35};
+				while (iter.hasNext()) {
+					Map.Entry entry = (Map.Entry) iter.next();
+					Object key = entry.getKey();
+					Object val = entry.getValue();
+					for(tokenNode tn:tokenMap){
+							if(key.equals(tn.getWord())){
+								button +="line:"+tn.getRow()+"\t"+tn.getWord()+"\t"+tn.getToken()+"\t"+val+"\n";
+								break;
+							}
+					}
+				}
+				for(tokenNode tn:tokenMap){
+					if(tn.getToken()==35){
+						button +="line:"+tn.getRow()+"\t"+tn.getWord()+"\t"+tn.getToken()+"\n";
+					}
+			}
+				textArea_2.append(button);
+			}
+		});
+		LL1_MI.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LL1_UI LL1 = new LL1_UI();
+				LL1.getFrame().setVisible(true);
+			}
+		});
 	}
 }
 
@@ -433,49 +596,49 @@ class Profile{
 	 File file = new File("Opt.ini"); 
 	 public Profile(){}
 	 boolean create(){
-	  boolean b = true;  
-	  if(file!=null){
-	   File directory = file.getParentFile();//获得文件的父目录
-	   if(!(directory==null)){//目录不存在时
-	    b = directory.mkdirs();//创建目录
-	   }else{//存在目录
-	    if(!file.exists()){//配置文件不存在时
-	     try {
-	      b = file.createNewFile();//创建配置文件
-	     } catch (IOException e) {
-	      b = false;
-	     }
-	    }
-	   }
-	  }  return b;
-	}
+		  boolean b = true;  
+		  if(file!=null){
+		   File directory = file.getParentFile();//获得文件的父目录
+		   if(!(directory==null)){//目录不存在时
+		b = directory.mkdirs();//创建目录
+		   }else{//存在目录
+				if(!file.exists()){//配置文件不存在时
+				 try {
+					 b = file.createNewFile();//创建配置文件
+				 } catch (IOException e) {
+				    	 b = false;
+				 }
+				}
+		   }
+		  }  return b;
+	 }
 	 
 	 boolean read(){
 	  Properties pro;//属性集
 	  FileInputStream is = null;
 	  boolean b = true;
 	  if(!file.exists()){//配置文件不存在时
-	   b = create();//创建一个
-	   if(b)//创建成功后
-	   b = write(latestPath);//初始化
-	   else//创建失败即不存在配置文件时弹出对话框提示错误
-	    JOptionPane.showConfirmDialog(null, "对不起，不存在配置文件！", "错误", 
-	     JOptionPane.YES_NO_OPTION, 
-	     JOptionPane.ERROR_MESSAGE);
+		b = create();//创建一个
+		if(b)//创建成功后
+		b = write(latestPath);//初始化
+		else//创建失败即不存在配置文件时弹出对话框提示错误
+		JOptionPane.showConfirmDialog(null, "对不起，不存在配置文件！", "错误", 
+		JOptionPane.YES_NO_OPTION, 
+		JOptionPane.ERROR_MESSAGE);
 	  }else{
-	   try {
-	    is = new FileInputStream(file);
-	    pro = new Properties();
-	    pro.load(is);//读取属性
-	    latestPath = pro.getProperty("latestPath");//读取配置参数latestPath的值
-	    is.close();
-	   }
-	   catch (IOException ex) {
-	    ex.printStackTrace(); 
-	    b =  false;
-	   }
+		  try {
+			is = new FileInputStream(file);
+			pro = new Properties();
+			pro.load(is);//读取属性
+			latestPath = pro.getProperty("latestPath");//读取配置参数latestPath的值
+			is.close();
+		  }
+		  catch (IOException ex) {
+			  ex.printStackTrace(); 
+			  b =  false;
+		  }
 	  }
-	  return b;
+	  	return b;
 	 }
 	 boolean write(String latestPath){  
 	  this.latestPath = latestPath;
