@@ -25,3 +25,13 @@
 * 语义分析与四元式生成放在`src/Semantic Analysis`中；
 * LL(1)预测分析放在`src/LL1V2`中；
 * 状态转换图生成放在`src/Java_pyGra`中。由于 `pygraphviz` 不支持混合编程，只能单独将生成reg2FA生成出状态转换表，然后再通过`Java_pyGra.py`转换成图片。
+
+使用说明：
+----
+运行环境支撑的话，通过`src/UI`中`MainUI.java`运行主程序，`LL1.java`、`reg2FA.java`都可以单独运行。`LineNumberHeaderView.java`用于在`MainUI`中显示行数，但存在一定问题，如果使用`LineNumberHeaderView`，不可同时使用`WindowBuilder`
+
+存在的问题：
+----
+* 语义分析嵌套语句：可以嵌套，但多层嵌套会出问题；
+* LL1预测暂时没考虑非LL1语法的文法
+* 图标用了Steam ;p
