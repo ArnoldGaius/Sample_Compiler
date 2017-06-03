@@ -28,11 +28,11 @@
 
 使用说明：
 ----
-运行环境支撑的话，通过`src/UI`中`MainUI.java`运行主程序，`LL1.java`、`reg2FA.java`都可以单独运行。`LineNumberHeaderView.java`用于在`MainUI`中显示行数，但存在一定问题，如果使用`LineNumberHeaderView`，不可同时使用`WindowBuilder`
+运行环境支撑的话，通过`src/UI`中`MainUI.java`运行主程序，`LL1.java`、`reg2FA.java`都可以单独运行。`LineNumberHeaderView.java`用于在`MainUI`中显示行数，但存在一定问题，如果使用`LineNumberHeaderView`，不可同时使用`WindowBuilder`。
 
 存在的问题：
 ----
 * 语义分析嵌套语句：可以嵌套，但多层嵌套会出问题；
-* LL1预测暂时没考虑非LL1语法的文法；
+* LL(1)预测暂时没考虑非LL(1)语法的文法；
 * 由于`pygraphviz` 不支持混合编程没能一步到位完成画状态图，需要手工在`reg2FA`界面选择生成状态表到本地，在`Java_pyGra.py`中读取状态表画图；
 * 图标用了Steam     `;p`
