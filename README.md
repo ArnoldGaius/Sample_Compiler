@@ -20,4 +20,8 @@
 
 功能讲解：
 ----
-1.分析功能（词法分析、语法分析）都放在'src/Analysis'中
+* 分析功能（词法分析、语法分析）都放在`src/Analysis`中；
+* 界面UI放在`src/UI`中；
+* 语义分析与四元式生成放在`src/Semantic Analysis`中；
+* LL(1)预测分析放在`src/LL1V2`中；
+* 状态转换图生成放在`src/Java_pyGra`中。由于 `pygraphviz` 不支持混合编程，只能单独将生成reg2FA生成出状态转换表，然后再通过`Java_pyGra.py`转换成图片。
