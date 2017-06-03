@@ -24,7 +24,7 @@
 * 界面UI放在`src/UI`中；
 * 语义分析与四元式生成放在`src/Semantic Analysis`中；
 * LL(1)预测分析放在`src/LL1V2`中；
-* 状态转换图生成放在`src/Java_pyGra`中。由于 `pygraphviz` 不支持混合编程，只能单独将生成reg2FA生成出状态转换表，然后再通过`Java_pyGra.py`转换成图片。
+* 状态转换图生成放在`src/Java_pyGra`中。由于 `pygraphviz` 不支持混合编程，只能单独将生成`reg2FA`生成出状态转换表，然后再通过`Java_pyGra.py`转换成图片。
 
 使用说明：
 ----
@@ -33,5 +33,6 @@
 存在的问题：
 ----
 * 语义分析嵌套语句：可以嵌套，但多层嵌套会出问题；
-* LL1预测暂时没考虑非LL1语法的文法
-* 图标用了Steam ;p
+* LL1预测暂时没考虑非LL1语法的文法；
+* 由于`pygraphviz` 不支持混合编程没能一步到位完成画状态图，需要手工在`reg2FA`界面选择生成状态表到本地，在`Java_pyGra.py`中读取状态表画图；
+* 图标用了Steam     `;p`
