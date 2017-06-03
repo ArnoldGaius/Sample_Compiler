@@ -1,5 +1,5 @@
-# 编译原理课程设计 
-
+# Sample语言编译器-编译原理课程设计
+# Sample_Language_Compiler
 运行环境:
 ----
 - Windows 10
