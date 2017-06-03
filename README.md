@@ -29,7 +29,8 @@
 使用说明：
 ----
 运行环境支撑的话，通过`src/UI`中`MainUI.java`运行主程序，`LL1.java`、`reg2FA.java`都可以单独运行。<br>
-`LineNumberHeaderView.java`用于在`MainUI`中显示行数，但存在一定问题，如果使用`LineNumberHeaderView`，不可同时使用`WindowBuilder`。
+`LineNumberHeaderView.java`用于在`MainUI`中显示行数，但存在一定问题，如果使用`LineNumberHeaderView`，不可同时使用`WindowBuilder`。<br>
+测试文件都在 **Test_File** 中
 
 存在的问题：
 ----
