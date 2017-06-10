@@ -1,4 +1,4 @@
-package UI;
+﻿package UI;
 
 import java.awt.EventQueue;
 
@@ -34,8 +34,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import YYtest.Word;
-import YYtest.semTest;
+import Semantic_Analysis.Word;
+import Semantic_Analysis.semTest;
 import Analysis.AnalysisCodeToWord;
 import Analysis.grammaticalAnalysis;
 import Analysis.tokenNode;

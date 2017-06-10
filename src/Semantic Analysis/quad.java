@@ -1,4 +1,4 @@
-package YYtest;
+package Semantic_Analysis;
 
 public class quad {
 	String result1;

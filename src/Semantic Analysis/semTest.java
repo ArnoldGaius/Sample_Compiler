@@ -1,4 +1,4 @@
-package YYtest;
+package Semantic_Analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
